@@ -1,0 +1,7 @@
+name: SitProject
+version: '1.0'
+main: me.samu.sitproject.SitProject
+api-version: '1.21'
+commands:
+  sit:
+    description: Sit anywhere in the world!
