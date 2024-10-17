@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class DismountEvent implements Listener {
 
@@ -21,6 +22,11 @@ public class DismountEvent implements Listener {
 
         SitProject.getSitManager().unsitPlayer(player);
         e.getDismounted().remove();
+    }
+
+    @EventHandler
+    public void removeSeatOnDisconnect(PlayerQuitEvent e) {
+        SitProject.getSitManager().unsitPlayer(e.getPlayer()); // Already checks if they're sitting or not.
     }
 
 }
