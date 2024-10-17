@@ -11,27 +11,28 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class SitManager {
 
-    private Set<UUID> sitted;
-    private SitProject sitProject;
-    private BukkitTask task;
+    private final SitProject sitProject;
+    private final HashMap<UUID, BukkitTask> sitters;
 
     public SitManager(SitProject sitProject) {
-        this.sitted = new HashSet<>();
         this.sitProject = sitProject;
+        this.sitters = new HashMap<>();
     }
 
     // VARIOUS CHECKS AND SETTERS
     public void unsitPlayer(Player player) {
-        if (!sitted.contains(player.getUniqueId())) return;
+        UUID uuid = player.getUniqueId();
+        if (!sitters.containsKey(uuid)) return;
+
+        BukkitTask task = sitters.get(uuid);
 
         player.teleport(player.getLocation().add(0, 2, 0));
-        sitted.remove(player.getUniqueId());
+        sitters.remove(uuid);
 
         if (task != null && !task.isCancelled()) {
             task.cancel();
@@ -39,22 +40,22 @@ public class SitManager {
     }
 
     public void sitPlayer(Player player) {
-        if (sitted.contains(player.getUniqueId())) return;
-
-        sitted.add(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        if (sitters.containsKey(uuid)) return;
 
         addChair(player.getLocation()).addPassenger(player);
-
-        task = new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§eᴘʀᴇѕѕ [ѕʜɪꜰᴛ] ᴛᴏ ᴅɪѕᴍᴏᴜɴᴛ!"));
             }
-        }.runTaskTimer(sitProject, 1, 1);
+        }.runTaskTimer(sitProject, 1, 2);
+
+        sitters.put(uuid, task);
     }
 
     private boolean isSitting(Player player) {
-        return sitted.contains(player.getUniqueId());
+        return sitters.containsKey(player.getUniqueId());
     }
 
     // ADD AN ARMORSTAND TO USE AS A VEHICLE
